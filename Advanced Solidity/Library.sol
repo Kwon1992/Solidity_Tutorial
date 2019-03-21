@@ -16,3 +16,17 @@ contract Bank {
         accounts[msg.sender] = accounts[msg.sender].sub(money);
     }
 }
+
+
+/**
+SOLIDITY LIBRARIES ON GITHUB:
+https://github.com/Modular-Network/ethereum-libraries
+
+https://github.com/alianse777/solidity-standard-library
+
+https://github.com/OpenZeppelin/openzeppelin-solidity
+
+https://github.com/ethereum/dapp-bin/tree/master/library
+
+Please write message me if there a broken link in here, or if you have found a useful library online so I can add it here. Thank you!
+*/
