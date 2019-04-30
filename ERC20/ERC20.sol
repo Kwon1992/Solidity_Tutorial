@@ -8,19 +8,29 @@ contract MyToken{
 
     uint256 private initialTokens;
     uint256 private totalTokens;
+    uint256 private tokenPrice;  // 1ETH에 몇 개의 토큰을 줄 것인가.
 
     mapping (address => uint256) balances;
     mapping (address => mapping (address => uint256)) private allowed; 
 
-    constructor (string memory _name, string memory _symbol, uint8 _decimals, uint256 _initialTokens) public { // Constructor only called once when deployed.
+    constructor (string memory _name, string memory _symbol, uint8 _decimals, uint256 _initialTokens, uint256 _tokenPrice) public payable { // Constructor only called once when deployed.
         name = _name;
         symbol = _symbol;
-        decimals = _decimals;
+        decimals = _decimals; // usually 18   [[1 eth = 1wei * 10^18]]
         initialTokens = _initialTokens;
         totalTokens = _initialTokens;
+        tokenPrice = _tokenPrice;
     }
     
 
+    function buyToken() payable public returns (uint boughtTokens) {
+        uint tokensToBuy = msg.value / tokenPrice;
+        require(balances[msg.sender] + tokensToBuy > balances[msg.sender]); // watch for overflow
+        require(totalTokens > tokensToBuy);
+        balances[msg.sender] += tokensToBuy;
+        totalTokens -= tokensToBuy;
+        return tokensToBuy;
+    }
 
     function transfer(address to, uint256 value) external returns (bool) {
         require(balances[msg.sender] >= value); // need more balance than value.
