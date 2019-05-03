@@ -1,7 +1,8 @@
 pragma solidity ^0.5.2;
 
 contract MyToken{
-
+    
+    address minter;
     string name;
     string symbol;
     uint8 decimals;
@@ -14,6 +15,7 @@ contract MyToken{
     mapping (address => mapping (address => uint256)) private allowed; 
 
     constructor (string memory _name, string memory _symbol, uint8 _decimals, uint256 _initialTokens, uint256 _tokenPrice) public payable { // Constructor only called once when deployed.
+        minter = msg.sender;
         name = _name;
         symbol = _symbol;
         decimals = _decimals; // usually 18   [[1 eth = 1wei * 10^18]]
@@ -22,6 +24,18 @@ contract MyToken{
         tokenPrice = _tokenPrice;
     }
     
+    
+    function getETH() public view returns (uint256) {
+        return address(this).balance;
+    }
+    
+    //to send ETH to deployer.
+    function sendETH() payable public returns (bool result) {
+        require(msg.sender == minter);
+        require(getETH() > 0);
+        msg.sender.transfer(address(this).balance);
+        return true;
+    }
 
     function buyToken() payable public returns (uint boughtTokens) {
         uint tokensToBuy = msg.value / tokenPrice;
