@@ -41,7 +41,7 @@ contract ButterToken { //ButterToken == GTK
     }
 
     //convert LTK to GTK function
-    function convertLTKtoGTK(address to, uint256 value)  public onlyOwner returns (bool result){
+    function convertLTKtoGTK(uint256 value, address to)  public onlyOwner returns (bool result){
         require(totalTokens - value >= 0);
         balances[to] += value;
         totalTokens -= value;
