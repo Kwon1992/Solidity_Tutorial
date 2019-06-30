@@ -3,6 +3,7 @@ pragma solidity 0.5.2;
 contract ButterToken { //ButterToken == GTK
 
     address owner;
+    address controller;
     string name;
     string symbol;
     uint256 private initialTokens;
@@ -22,7 +23,7 @@ contract ButterToken { //ButterToken == GTK
         tokenPrice = 10000000000000;
     }
 
-    modifier onlyOnwer() {
+    modifier onlyOwner() {
         require(msg.sender == owner || msg.sender == controller);
         _;
     }

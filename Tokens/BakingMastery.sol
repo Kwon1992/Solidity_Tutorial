@@ -4,6 +4,7 @@ pragma solidity 0.5.2;
 contract BakingMastery{ // LTK == BakingMastery
 
     address owner;
+    address controller;
     string name;
     string symbol;
     uint256 private initialTokens;
@@ -15,6 +16,7 @@ contract BakingMastery{ // LTK == BakingMastery
 
     constructor (string memory _name, string memory _symbol, address minter) public payable { // Constructor only called once when deployed.
         owner = minter;
+        controller = msg.sender;
         name = _name;
         symbol = _symbol;
 
@@ -22,7 +24,7 @@ contract BakingMastery{ // LTK == BakingMastery
         totalTokens = 10**21;
     }
 
-    modifier onlyOnwer() {
+    modifier onlyOwner() {
         require(msg.sender == owner || msg.sender == controller);
         _;
     }
