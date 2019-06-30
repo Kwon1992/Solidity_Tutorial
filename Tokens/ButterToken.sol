@@ -92,12 +92,22 @@ contract ButterToken { //ButterToken == GTK
 
     }
 
+    // VIEWERS
+
     function totalSupply() external view returns (uint256) {
         return totalTokens;
     }
 
     function balanceOf(address who) external view returns (uint256) {
         return balances[who];
+    }
+
+    function viewOwner() external view returns (address) {
+        return owner;
+    }
+
+    function viewcontroller() external view returns (address) {
+        return controller;
     }
 
 
