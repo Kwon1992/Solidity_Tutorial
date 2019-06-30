@@ -1,7 +1,7 @@
 pragma solidity 0.5.2;
 
 import "./ButterToken.sol";
-import "./LeaderToken.sol";
+import "./BakingMastery.sol";
 
 contract TokenController{
     address owner;
@@ -15,7 +15,7 @@ contract TokenController{
 
     function convertTokens(uint256 amount) returns (uint256) { // BakingMastery to Butter
         //여기서의 msg.sender == Token 교환을 요청한 user
-        require(LeaderToken(tokens[1]).convertLTKtoGTK(amount, msg.sender));
+        require(BakingMastery(tokens[1]).convertLTKtoGTK(amount, msg.sender));
         ButterToken(tokens[0]).convertLTKtoGTK(amount/100, msg.sender);
         return amount/100;
     } 
