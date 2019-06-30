@@ -1,0 +1,103 @@
+pragma solidity 0.5.2;
+
+import "./GameToken.sol";
+
+contract LeaderToken{
+
+    GameToken GTK = GameToken(0x6FF3Bc1154D8B1b7cceA5D5F5D54c303b918c228);
+
+    address minter;
+    string name;
+    string symbol;
+    uint8 decimals;
+    uint256 private initialTokens;
+    uint256 private totalTokens;
+    uint256 private tokenPrice;  // 1ETH에 몇 개의 토큰을 줄 것인가.
+
+    mapping (address => uint256) balances;
+    mapping (address => mapping (address => uint256)) private allowed;
+
+    constructor (string memory _name, string memory _symbol, uint8 _decimals) public payable { // Constructor only called once when deployed.
+        minter = msg.sender;
+        name = _name;
+        symbol = _symbol;
+        decimals = _decimals; // usually 18   [[1 eth = 1wei * 10^18]]
+        initialTokens = 10**21;
+        totalTokens = 10**21;
+        tokenPrice = 10**17;
+    }
+
+
+    // make LeaderToken Account
+    function createAccount() public returns (bool) {
+        require(balances[msg.sender] == 0x0);
+        balances[msg.sender] = 0;
+        return true;
+    }
+
+    // get LTK
+    function getLTK(uint256 value) public returns (uint256 remains) {
+        require(totalTokens >= 0);
+        require(balances[msg.sender] + value > balances[msg.sender]);
+        balances[msg.sender] += value;
+        totalTokens -= value;
+        return balances[msg.sender];
+    }
+
+    // convert LTK to GTK [1:1 ratio]
+    function convertLTKtoGTK(uint256 amount) public {
+        require(balances[msg.sender] - amount > 0);
+        balances[msg.sender] -= amount;
+        GTK.convertLTKtoGTK(msg.sender ,amount);
+
+    }
+
+
+    function transfer(address to, uint256 value) external returns (bool) {
+        require(balances[msg.sender] >= value); // need more balance than value.
+        require(balances[to] != 0x0); // "to" must have an account for transfer.
+        require(balances[to] + value > balances[to]); // caution for overflow.
+        balances[msg.sender] -= value;
+        balances[to] += value;
+
+        emit Transfer(msg.sender, to, value);
+        return true;
+    }
+
+    function approve(address spender, uint256 value) external returns (bool) {
+        allowed[msg.sender][spender] = value;
+        emit Approval(msg.sender, spender, value);
+        return true;
+    }
+
+    function allowance(address owner, address spender) public view returns (uint256) {
+        return allowed[owner][spender];
+    }
+
+    function transferFrom(address from, address to, uint256 value) external returns (bool) {
+        require(balances[from] != 0x0 && balances[to] != 0x0);
+        require(balances[from] >= value);
+        require(balances[to] + value > value);
+        require(allowance(from, msg.sender) != 0);
+
+        balances[from] -= value;
+        balances[to] += value;
+        allowed[from][msg.sender] -= 1; // sub 1 from count of approve
+        return true;
+
+    }
+
+    function totalSupply() external view returns (uint256) {
+        return totalTokens;
+    }
+
+    function balanceOf(address who) external view returns (uint256) {
+        return balances[who];
+    }
+
+
+
+    event Transfer(address indexed from, address indexed to, uint256 value);
+
+    event Approval(address indexed owner, address indexed spender, uint256 value);
+}
