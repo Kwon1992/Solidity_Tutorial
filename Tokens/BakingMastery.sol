@@ -1,11 +1,11 @@
 pragma solidity 0.5.2;
 
-contract GameToken{
 
-    address minter;
+contract BakingMastery{ // LTK == BakingMastery
+
+    address owner;
     string name;
     string symbol;
-    uint8 decimals;
     uint256 private initialTokens;
     uint256 private totalTokens;
     uint256 private tokenPrice;  // 1ETH에 몇 개의 토큰을 줄 것인가.
@@ -13,46 +13,45 @@ contract GameToken{
     mapping (address => uint256) balances;
     mapping (address => mapping (address => uint256)) private allowed;
 
-    constructor (string memory _name, string memory _symbol, uint8 _decimals) public payable { // Constructor only called once when deployed.
-        minter = msg.sender;
+    constructor (string memory _name, string memory _symbol, address minter) public payable { // Constructor only called once when deployed.
+        owner = minter;
         name = _name;
         symbol = _symbol;
-        decimals = _decimals; // usually 18   [[1 eth = 1wei * 10^18]]
+
         initialTokens = 10**21;
         totalTokens = 10**21;
-        tokenPrice = 10**17;
+    }
+
+    modifier onlyOnwer() {
+        require(msg.sender == owner || msg.sender == controller);
+        _;
     }
 
 
-    function getETH() public view returns (uint256) {
-        return address(this).balance;
-    }
-
-    //to send ETH to deployer.
-    function sendETH() payable public returns (bool result) {
-        require(msg.sender == minter);
-        require(getETH() > 0);
-        msg.sender.transfer(address(this).balance);
+    // give initial BakingMasteryToken
+    function createAccount() public returns (bool) {
+        require(balances[msg.sender] == 0);
+        totalTokens -= 10000;
+        balances[msg.sender] += 10000;
         return true;
     }
 
-    //convert LTK to GTK function
-    //issue : how to restrict direct access from users?? solution???
-    function convertLTKtoGTK(address to, uint256 value) public returns (bool result){
-        require(totalTokens - value > 0);
-        balances[to] += value;
+    // get BakingMastery
+    function getLTK(uint256 value) public returns (uint256 remains) {
+        require(totalTokens >= 0);
+        require(balances[msg.sender] + value > balances[msg.sender]);
+        balances[msg.sender] += value;
+        totalTokens -= value;
+        return balances[msg.sender];
+    }
+
+    // convert LTK to GTK [1:1 ratio]
+    function convertLTKtoGTK(uint256 amount, address user) public onlyOwner returns (bool) {
+        require(balances[user] - amount > 0);
+        balances[user] -= amount;
         return true;
     }
 
-
-    function buyToken() payable public returns (uint boughtTokens) {
-        uint tokensToBuy = msg.value / tokenPrice;
-        require(balances[msg.sender] + tokensToBuy > balances[msg.sender]); // watch for overflow
-        require(totalTokens > tokensToBuy);
-        balances[msg.sender] += tokensToBuy;
-        totalTokens -= tokensToBuy;
-        return tokensToBuy;
-    }
 
     function transfer(address to, uint256 value) external returns (bool) {
         require(balances[msg.sender] >= value); // need more balance than value.
